@@ -1,0 +1,78 @@
+Fusing Multiple Speech Recognizers for a High-Accuracy Transcript
+
+This job requires the ability to find clever solutions to a complex problem.
+
+PROJECT OVERVIEW
+
+The objective of this project is to find the best algorithm for combining the results of multiple speech recognizers into a single result.  The best solution is likely to be based on a fusion algorithm such as ROVER (Recognition Output Voting Error Reduction).
+
+There is a free version of ROVER by NIST, but it makes an approximation that may give us less than ideal results, especially for large (>10) numbers of inputs.  The approximation is that ROVER, instead of simultaneously and optimally aligning all inputs, aligns the first two inputs, then aligns the third input with this initial alignment, then the fourth, and so on.  A point of evidence that this method is suboptimal is that we get a different result if we rearrange the inputs.  Your mission is to write a ROVER routine, preferably in C, C++, or C#, that provides improved accuracy.
+
+Running the most accurate ROVER routine possible may require an impractical amount of CPU time.  Your solution will need to run at a reasonable speed (i.e. can process perhaps 30 input files in real-time on a single core).  If possible, you would show what the best possible accuracy could be and how close your algorithm comes to this ideal.
+
+It may be that a suitable solution already exists in academia or elsewhere.  Don't feel you need to invent a new method from scratch if someone else has already done the work.  You may use any free or open source software, including NIST ROVER, for the solution as long as source code is available and the license allows commercial use.
+
+ATTACHMMENTS
+
+I will provide a test program that uses ROVER, part of the free NIST toolset, SCTK, to reconstruct an original phrase from, say, 10 corrupted versions.  The purpose is to test error reconstruction algorithms.  The included files, rover.py, orig, and notes, are available to measure how accurate NIST ROVER is on artificially-generated data.  They may be adapted to measure the accuracy of your algorithm also.  They run on Windows under cygwin, but will probably work on most Unix/Linux/MacOS systems.  You'll also need to install NIST SCTK.
+
+The program rover.py reads in a text file, creates N corrupted versions, and then attempts to reconstruct the original by voting on the corrupted versions.
+
+SOURCE FILE
+
+The text file I used for testing contains one of several phrases such as, "Had some really good news today." The file, orig, contains several examples.  All are ignored by rover.py except the one on the first line.  This original phrase is assumed to be correct.  The hypotheses are corrupted versions of orig, line 1, and the ROVER version is derived from the hypotheses.
+
+CORRUPTED HYPOTHESES
+
+To generate each corrupted representation (also called hypothesis) of the original phrase, I introduce P errors at random.  These hypotheses are input to the voting algorithm, ROVER.  For insertions, I insert a random number (0-999) at a random location.
+
+For insertions, I insert a random number (between 0 and 999) at a random location.  I use numbers in place of words out of convenience; they're easy to generate.  For deletions, I select a word at random and remove it.  For substitutions, I select a word at random and replace it with a negative number -(0-999).  You should not take advantage of the fact that you know insertions and substitutions are always digit strings.  In a real implementation, they would be random words.
+
+ROVER
+
+The routine, runrover(), takes N hypotheses and tries to reconstruct orig.  It returns a variable, fusion, the reconstruction attempt.
+
+In some ROVER implementations, each speech recognizer provides multiple hypothesis and confidence scores for each word or phrase.  Sometimes the recognizer provides a lattice or word confusion network.  We assume none of these.  For this project, assume that each recognizer generates only a single hypothesis and no confidence scores.
+
+MEASURING ACCURACY
+
+The script, rover.py, use sclite to measure accuracy in the the function runsclite().  You don't need to worry about text normalization (e.g. equating "isn't" with "is not").  Just assume if a word is not an exact match, it's an error.
+
+USEFUL REFERENCES
+
+SCLITE
+
+https://www.nist.gov/itl/iad/mig/tools
+	Download NIST sclite, rover, and others
+http://www1.icsi.berkeley.edu/Speech/docs/sctk-1.2/sclite.htm
+	Sclite documentation
+http://www1.icsi.berkeley.edu/Speech/docs/sctk-1.2/options.htm
+	Sclite command line options
+http://www1.icsi.berkeley.edu/Speech/docs/sctk-1.2/infmts.htm
+	Sclite input file formats
+http://mariangemarcano.blogspot.com/2012/09/ \
+	speech-recognition-setting-up-sclite.html
+	Maria Marcano notes on compiling sclite
+
+ROVER
+
+https://repository.library.northeastern.edu/files/neu:1265/fulltext.pdf
+	2009 thesis on ROVER
+http://www1.icsi.berkeley.edu/Speech/docs/sctk-1.2/rover.htm
+	Documentation for NIST ROVER
+https://github.com/foundintranslation/Kaldi \
+	/blob/master/tools/sctk-2.4.0/src/sclite/rover.c
+	Source code for ROVER
+https://github.com/foundintranslation/Kaldi/ \
+	blob/master/tools/sctk-2.4.0/doc/rover.1
+	troff documentation for ROVER
+https://groups.google.com/forum/#!topic/kaldi-help/Ba9HptrbNLs
+	Dan Povey comments on ROVER for Kaldi
+nats-www.informatik.uni-hamburg.de/pub/SLP16/WebHome/POSTER-sctk.pdf
+	Paper using NIST.  Describes approximate algorithm.
+https://arxiv.org/abs/1706.07238
+	Paper that claims improvement over ROVER.
+http://www1.icsi.berkeley.edu/Speech/docs/sctk-1.2/rover.htm
+	ROVER documentation
+http://my.fit.edu/~vkepuska/ece5527/sctk-2.3-rc1/doc/rover/rover.htm
+*	A ROVER example
